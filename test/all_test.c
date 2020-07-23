@@ -6,6 +6,7 @@
 
 #include "unity.h"
 #include "checksum_test.h"
+#include "modbus_test.h"
 
 void setUp(void)
 {
@@ -20,12 +21,7 @@ void tearDown(void)
 int test_all(void)
 {
     UNITY_BEGIN();
-    checksum_test();
+    test_checksum();
+    test_modbus();
     return UNITY_END();
-}
-
-void checksum_test(void)
-{
-    RUN_TEST(test_checksum_lrc);
-    RUN_TEST(test_checksum_crc);
 }

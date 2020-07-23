@@ -6,6 +6,5 @@
 #define MODBUSMASTER_ALL_TEST_H
 
 int test_all(void);
-void checksum_test(void);
 
 #endif //MODBUSMASTER_ALL_TEST_H

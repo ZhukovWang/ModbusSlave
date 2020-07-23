@@ -13,4 +13,8 @@ add_executable(ModbusMaster
         test/checksum_test.c
         test/checksum_test.h
         test/all_test.c
-        test/all_test.h)
+        test/all_test.h
+        src/modbus.c
+        src/modbus.h
+        test/modbus_test.c
+        test/modbus_test.h src/register.c src/register.h src/config.c src/config.h)

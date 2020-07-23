@@ -7,6 +7,12 @@
 #include "../src/checksum.h"
 #include "unity.h"
 
+void test_checksum(void)
+{
+    RUN_TEST(test_checksum_lrc);
+    RUN_TEST(test_checksum_crc);
+}
+
 void test_checksum_lrc(void)
 {
     uint8_t data[6] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x02};
