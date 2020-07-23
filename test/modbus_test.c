@@ -17,6 +17,12 @@ void test_modbus(void)
     RUN_TEST(test_read_correct);
     RUN_TEST(test_write_single_rx_length_error);
     RUN_TEST(test_write_single_correct);
+    RUN_TEST(test_write_multiple_rx_length_error);
+    RUN_TEST(test_write_multiple_rx_length2_error);
+    RUN_TEST(test_write_multiple_rx_length3_error);
+    RUN_TEST(test_write_multiple_rx_length4_error);
+    RUN_TEST(test_write_multiple_out_of_range_error);
+    RUN_TEST(test_write_multiple_correct);
 }
 
 void test_command_error(void)
@@ -129,4 +135,109 @@ void test_write_single_correct(void)
     TEST_ASSERT_EQUAL_INT8(0x55, tx_data[4]);
     TEST_ASSERT_EQUAL_INT8(0xAA, tx_data[5]);
     TEST_ASSERT_EQUAL_INT16(0x55AA, registers.u16[0x10]);
+}
+
+void test_write_multiple_rx_length_error(void)
+{
+    uint8_t rx_data[19] = {0x01, 0x10, 0x00, 0x10, 0x00, 0x06, 0x0C,
+                          0xAA, 0x55, 0x12, 0x34, 0x55, 0xAA,
+                          0xEE, 0xFF, 0x56, 0x78, 0xBB, 0xCC};
+    uint8_t tx_data[255];
+    uint16_t tx_length = 0;
+    uint8_t result = modbus_entry(&rx_data[0], 18, &tx_data[0], &tx_length);
+
+    TEST_ASSERT_EQUAL_INT8(0x01, result);
+    TEST_ASSERT_EQUAL_INT16(3, tx_length);
+    TEST_ASSERT_EQUAL_INT8(0x01, tx_data[0]);
+    TEST_ASSERT_EQUAL_INT8(0x90, tx_data[1]);
+    TEST_ASSERT_EQUAL_INT8(0x07, tx_data[2]);
+}
+
+void test_write_multiple_rx_length2_error(void)
+{
+    uint8_t rx_data[19] = {0x01, 0x10, 0x00, 0x10, 0x00, 0x06, 0x0C};
+    uint8_t tx_data[255];
+    uint16_t tx_length = 0;
+    uint8_t result = modbus_entry(&rx_data[0], 7, &tx_data[0], &tx_length);
+
+    TEST_ASSERT_EQUAL_INT8(0x01, result);
+    TEST_ASSERT_EQUAL_INT16(3, tx_length);
+    TEST_ASSERT_EQUAL_INT8(0x01, tx_data[0]);
+    TEST_ASSERT_EQUAL_INT8(0x90, tx_data[1]);
+    TEST_ASSERT_EQUAL_INT8(0x07, tx_data[2]);
+}
+
+void test_write_multiple_rx_length3_error(void)
+{
+    uint8_t rx_data[19] = {0x01, 0x10, 0x00, 0x10, 0x00, 0x06, 0x0B,
+                           0xAA, 0x55, 0x12, 0x34, 0x55, 0xAA,
+                           0xEE, 0xFF, 0x56, 0x78, 0xBB, 0xCC};
+    uint8_t tx_data[255];
+    uint16_t tx_length = 0;
+    uint8_t result = modbus_entry(&rx_data[0], 19, &tx_data[0], &tx_length);
+
+    TEST_ASSERT_EQUAL_INT8(0x01, result);
+    TEST_ASSERT_EQUAL_INT16(3, tx_length);
+    TEST_ASSERT_EQUAL_INT8(0x01, tx_data[0]);
+    TEST_ASSERT_EQUAL_INT8(0x90, tx_data[1]);
+    TEST_ASSERT_EQUAL_INT8(0x03, tx_data[2]);
+}
+
+void test_write_multiple_rx_length4_error(void)
+{
+    uint8_t rx_data[17] = {0x01, 0x10, 0x00, 0x10, 0x00, 0x06, 0x0C,
+                           0xAA, 0x55, 0x12, 0x34, 0x55, 0xAA,
+                           0xEE, 0xFF, 0x56, 0x78};
+    uint8_t tx_data[255];
+    uint16_t tx_length = 0;
+    uint8_t result = modbus_entry(&rx_data[0], 17, &tx_data[0], &tx_length);
+
+    TEST_ASSERT_EQUAL_INT8(0x01, result);
+    TEST_ASSERT_EQUAL_INT16(3, tx_length);
+    TEST_ASSERT_EQUAL_INT8(0x01, tx_data[0]);
+    TEST_ASSERT_EQUAL_INT8(0x90, tx_data[1]);
+    TEST_ASSERT_EQUAL_INT8(0x07, tx_data[2]);
+}
+
+void test_write_multiple_out_of_range_error(void)
+{
+    uint8_t rx_data[19] = {0x01, 0x10, 0xFF, 0xFE, 0x00, 0x06, 0x0C,
+                           0xAA, 0x55, 0x12, 0x34, 0x55, 0xAA,
+                           0xEE, 0xFF, 0x56, 0x78, 0xBB, 0xCC};
+    uint8_t tx_data[255];
+    uint16_t tx_length = 0;
+    uint8_t result = modbus_entry(&rx_data[0], 19, &tx_data[0], &tx_length);
+
+    TEST_ASSERT_EQUAL_INT8(0x01, result);
+    TEST_ASSERT_EQUAL_INT16(3, tx_length);
+    TEST_ASSERT_EQUAL_INT8(0x01, tx_data[0]);
+    TEST_ASSERT_EQUAL_INT8(0x90, tx_data[1]);
+    TEST_ASSERT_EQUAL_INT8(0x07, tx_data[2]);
+}
+
+void test_write_multiple_correct(void)
+{
+    uint8_t rx_data[19] = {0x01, 0x10, 0x00, 0x10, 0x00, 0x06, 0x0C,
+                           0xAA, 0x55, 0x12, 0x34, 0x55, 0xAA,
+                           0xEE, 0xFF, 0x56, 0x78, 0xBB, 0xCC};
+    uint8_t tx_data[255];
+    uint16_t tx_length = 0;
+    uint8_t result = modbus_entry(&rx_data[0], 19, &tx_data[0], &tx_length);
+
+    TEST_ASSERT_EQUAL_INT8(0x01, result);
+    TEST_ASSERT_EQUAL_INT16(6, tx_length);
+    TEST_ASSERT_EQUAL_INT8(0x01, tx_data[0]);
+    TEST_ASSERT_EQUAL_INT8(0x10, tx_data[1]);
+    TEST_ASSERT_EQUAL_INT8(0x00, tx_data[2]);
+    TEST_ASSERT_EQUAL_INT8(0x10, tx_data[3]);
+    TEST_ASSERT_EQUAL_INT8(0x00, tx_data[4]);
+    TEST_ASSERT_EQUAL_INT8(0x06, tx_data[5]);
+
+    TEST_ASSERT_EQUAL_INT16(0xAA55, registers.u16[0x10]);
+    TEST_ASSERT_EQUAL_INT16(0x1234, registers.u16[0x11]);
+    TEST_ASSERT_EQUAL_INT16(0x55AA, registers.u16[0x12]);
+    TEST_ASSERT_EQUAL_INT16(0xEEFF, registers.u16[0x13]);
+    TEST_ASSERT_EQUAL_INT16(0x5678, registers.u16[0x14]);
+    TEST_ASSERT_EQUAL_INT16(0xBBCC, registers.u16[0x15]);
+
 }
