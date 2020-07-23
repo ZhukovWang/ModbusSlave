@@ -11,5 +11,7 @@ void test_read_length_error(void);
 void test_read_rx_length_error(void);
 void test_read_out_of_range_error(void);
 void test_read_correct(void);
+void test_write_single_rx_length_error(void);
+void test_write_single_correct(void);
 
 #endif //MODBUSMASTER_MODBUS_TEST_H
