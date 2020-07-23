@@ -1,6 +1,10 @@
 # ModbusSlave
 
-ModbusSlave is a modbus slave libary. Build by standard C11 and can be used in Windows/Linux/embedded. Had been test in Windows(msys gcc) and Linux(Ubuntu 18.04).
+ModbusSlave is a modbus slave libary. 
+
+Build by standard C11 and can be used in Windows/Linux/embedded. 
+
+Had been tested in Windows (msys gcc 9.3) and Linux (Ubuntu 18.04 gcc 7.5).
 
 Support ascii and rtu mode. Can be used in serial or tcp.
 
