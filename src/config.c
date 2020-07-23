@@ -12,4 +12,4 @@ uint8_t slave_id = 0x01;
 /*
  * mode: 00:rtu  01:ascii
  */
-uint8_t slave_mode = 0x00;
+uint8_t slave_mode = RTU_MODE;

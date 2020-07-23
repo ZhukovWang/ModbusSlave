@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-project(ModbusMaster)
+project(ModbusSlave)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(ModbusMaster
+add_executable(ModbusSlave
         main.c
         test/unity.c
         test/unity.c
@@ -17,4 +17,4 @@ add_executable(ModbusMaster
         src/modbus.c
         src/modbus.h
         test/modbus_test.c
-        test/modbus_test.h src/register.c src/register.h src/config.c src/config.h)
+        test/modbus_test.h src/register.c src/register.h src/config.c src/config.h src/frame_conversion.c src/frame_conversion.h test/frame_conversion_test.c test/frame_conversion_test.h src/frame.c src/frame.h test/frame_test.c test/frame_test.h)

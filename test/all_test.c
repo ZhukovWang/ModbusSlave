@@ -7,6 +7,8 @@
 #include "unity.h"
 #include "checksum_test.h"
 #include "modbus_test.h"
+#include "frame_conversion_test.h"
+#include "frame_test.h"
 
 void setUp(void)
 {
@@ -22,6 +24,8 @@ int test_all(void)
 {
     UNITY_BEGIN();
     test_checksum();
+    test_conversion();
     test_modbus();
+    test_frame();
     return UNITY_END();
 }
