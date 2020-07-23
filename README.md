@@ -6,8 +6,26 @@ Support ascii and rtu mode. Can be used in serial or tcp.
 
 ## Build
 
-Use Cmake to build.
+Use [Cmake](https://github.com/Kitware/CMake) to build.
+
+The unit testing suits is [Unity](https://github.com/ThrowTheSwitch/Unity).
 
 ## Usage
 
 The libary main function is `frame_entry()` in `src/frame.c`.
+
+Test the libary:
+
+```bash
+$ ModbusSlave
+```
+
+Unit test the libary:
+
+```bash
+$ ModbusSlave test
+```
+
+## LICENSE
+
+MIT
