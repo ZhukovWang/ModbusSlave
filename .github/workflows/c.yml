@@ -20,4 +20,4 @@ jobs:
     - name: make
       run: make
     - name: test
-      run: ModbusSlave test
+      run: ./ModbusSlave test
