@@ -18,6 +18,7 @@
 #define WRITE_MULTIPLE_REGISTERS_COMMAND 0x10
 #define READ_COILS_COMMAND 0x01
 #define WRITE_SINGLE_COIL_COMMAND 0x05
+#define WRITE_MULTIPLE_COILS_COMMAND 0x0F
 
 /*
  * modbus protocol entry
@@ -46,6 +47,10 @@ int8_t modbus_entry(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_l
         else if (rx[1] == WRITE_SINGLE_COIL_COMMAND)
         {
             command_write_single_coil(rx, rx_length, tx, tx_length);
+        }
+        else if (rx[1] == WRITE_MULTIPLE_COILS_COMMAND)
+        {
+            command_write_multiple_coils(rx, rx_length, tx, tx_length);
         }
         else
         {
@@ -94,7 +99,7 @@ int8_t command_read_registers(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint
             }
             else
             {
-                if ((uint32_t)((uint32_t)read_address + (uint32_t)read_length) >= MAX_READ_REGISTERS) //read register in the scope
+                if ((uint32_t)((uint32_t)read_address + (uint32_t)read_length) > MAX_READ_REGISTERS) //read register in the scope
                 {
                     tx[0] = slave_id;
                     tx[1] = rx[1] | (1 << 7);
@@ -215,7 +220,7 @@ int8_t command_write_multiple_registers(uint8_t *rx, uint16_t rx_length, uint8_t
             }
             else
             {
-                if ((uint32_t)((uint32_t)write_address + (uint32_t)write_word_length) >= MAX_WRITE_MULTIPLE_REGISTERS) //write register in the scope
+                if ((uint32_t)((uint32_t)write_address + (uint32_t)write_word_length) > MAX_WRITE_MULTIPLE_REGISTERS) //write register in the scope
                 {
                     tx[0] = slave_id;
                     tx[1] = rx[1] | (1 << 7);
@@ -280,7 +285,7 @@ int8_t command_read_coils(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t
             }
             else
             {
-                if ((uint32_t)((uint32_t)read_address + (uint32_t)read_length) >= MAX_READ_COILS) //read coil in the scope
+                if ((uint32_t)((uint32_t)read_address + (uint32_t)read_length) > MAX_READ_COILS) //read coil in the scope
                 {
                     tx[0] = slave_id;
                     tx[1] = rx[1] | (1 << 7);
@@ -367,6 +372,116 @@ int8_t command_write_single_coil(uint8_t *rx, uint16_t rx_length, uint8_t *tx, u
             tx[5] = write_data & 0x00FF;
             *tx_length = 6;
             return 1;
+        }
+        else
+        {
+            tx[0] = slave_id;
+            tx[1] = rx[1] | (1 << 7);
+            tx[2] = ERROR_CODE_ADRRESS_ERROR;
+            *tx_length = 3;
+            return 1;
+        }
+    }
+}
+
+int8_t command_write_multiple_coils(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_length)
+{
+    if (((rx_length & 1) == 0) || (rx_length < 7)) //rx length is wrong
+    {
+        tx[0] = slave_id;
+        tx[1] = rx[1] | (1 << 7);
+        tx[2] = ERROR_CODE_OTHER_ERROR;
+        *tx_length = 3;
+        return 1;
+    }
+    else
+    {
+        uint16_t write_address = (rx[2] << 8) | rx[3];
+        uint16_t write_bit_length = (rx[4] << 8) | rx[5];
+        uint16_t write_byte_length = rx[6];
+
+        if (write_byte_length != ceil(write_bit_length / 8.0)) //write length is not correct
+        {
+            tx[0] = slave_id;
+            tx[1] = rx[1] | (1 << 7);
+            tx[2] = ERROR_CODE_DATA_ERROR;
+            *tx_length = 3;
+            return 1;
+        }
+
+        if (write_bit_length + 7 != rx_length)
+        {
+            tx[0] = slave_id;
+            tx[1] = rx[1] | (1 << 7);
+            tx[2] = ERROR_CODE_OTHER_ERROR;
+            *tx_length = 3;
+            return 1;
+        }
+
+        if (write_address >= MIN_WRITE_MULTIPLE_COILS && write_address <= MAX_WRITE_MULTIPLE_COILS) //write address in the scope
+        {
+            if (write_bit_length > MAX_WRITE_MULTIPLE_COILS_LENGTH) //write length in the scope
+            {
+                tx[0] = slave_id;
+                tx[1] = rx[1] | (1 << 7);
+                tx[2] = ERROR_CODE_DATA_ERROR;
+                *tx_length = 3;
+                return 1;
+            }
+            else
+            {
+                if ((uint32_t)((uint32_t)write_address + (uint32_t)write_bit_length) > MAX_WRITE_MULTIPLE_COILS) //write register in the scope
+                {
+                    tx[0] = slave_id;
+                    tx[1] = rx[1] | (1 << 7);
+                    tx[2] = ERROR_CODE_OTHER_ERROR;
+                    *tx_length = 3;
+                    return 1;
+                }
+                else
+                {
+                    // all good
+
+                    uint16_t start_write_byte_address = write_address / 8;
+                    uint8_t start_write_byte_bit_address = write_address % 8;
+
+                    for (uint8_t j = start_write_byte_bit_address; j < 8; ++j)
+                    {
+                        if ((rx[15 - start_write_byte_bit_address] & 1) == 0)
+                        {
+                            registers.u8[start_write_byte_address] = registers.u8[start_write_byte_address] & ~(1 << j);
+                        }
+                        else
+                        {
+                            registers.u8[start_write_byte_address] = registers.u8[start_write_byte_address] | (1 << j);
+                        }
+                    }
+
+                    for (uint32_t i = 0; i < (write_bit_length - 8 + start_write_byte_bit_address); ++i)
+                    {
+                        uint16_t byte_num = floor(i / 8.0);
+                        uint8_t bit_num = i % 8;
+
+                        if ((rx[15 - start_write_byte_bit_address] & 1) == 0)
+                        {
+                            registers.u8[start_write_byte_address + 1 + byte_num] = registers.u8[start_write_byte_address + 1 + byte_num] & ~(1 << bit_num);
+                        }
+                        else
+                        {
+                            registers.u8[start_write_byte_address + 1 + byte_num] = registers.u8[start_write_byte_address + 1 + byte_num] | (1 << bit_num);
+                        }
+                    }
+
+                    tx[0] = slave_id;
+                    tx[1] = WRITE_MULTIPLE_COILS_COMMAND;
+                    tx[2] = write_address >> 8;
+                    tx[3] = write_address & 0x00FF;
+                    tx[4] = write_bit_length >> 8;
+                    tx[5] = write_bit_length & 0x00FF;
+                    *tx_length = 6;
+                    return 1;
+                }
+            }
         }
         else
         {

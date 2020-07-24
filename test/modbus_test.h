@@ -25,5 +25,11 @@ void test_read_coils_out_of_range_error(void);
 void test_read_coils_correct(void);
 void test_write_single_coil_rx_length_error(void);
 void test_write_single_coil_correct(void);
+void test_write_multiple_coils_rx_length_error(void);
+void test_write_multiple_coils_rx_length2_error(void);
+void test_write_multiple_coils_rx_length3_error(void);
+void test_write_multiple_coils_rx_length4_error(void);
+void test_write_multiple_coils_out_of_range_error(void);
+void test_write_multiple_coils_correct(void);
 
 #endif //MODBUSMASTER_MODBUS_TEST_H
