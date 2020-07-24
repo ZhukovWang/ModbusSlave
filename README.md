@@ -12,7 +12,7 @@ Support ascii and rtu mode. Can be used in serial or tcp.
 
 - [x] 0x01
 - [x] 0x03
-- [ ] 0x05
+- [x] 0x05
 - [x] 0x06
 - [ ] 0x0F
 - [x] 0x10

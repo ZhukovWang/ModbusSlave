@@ -20,6 +20,9 @@
 #define MAX_READ_COILS 0x0FFF
 #define MAX_READ_COILS_LENGTH 0x20
 
+#define MIN_WRITE_SINGLE_COIL 0
+#define MAX_WRITE_SINGLE_COIL 0x0FFF
+
 union register_union
 {
     uint8_t u8[0x20000];

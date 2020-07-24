@@ -14,9 +14,10 @@
 #define ERROR_CODE_OTHER_ERROR 0x07
 
 #define READ_REGISTERS_COMMAND 0x03
-#define WRITE_SINGLE_REGISTERS_COMMAND 0x06
+#define WRITE_SINGLE_REGISTER_COMMAND 0x06
 #define WRITE_MULTIPLE_REGISTERS_COMMAND 0x10
 #define READ_COILS_COMMAND 0x01
+#define WRITE_SINGLE_COIL_COMMAND 0x05
 
 /*
  * modbus protocol entry
@@ -30,9 +31,9 @@ int8_t modbus_entry(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_l
         {
             command_read_registers(rx, rx_length, tx, tx_length);
         }
-        else if (rx[1] == WRITE_SINGLE_REGISTERS_COMMAND)
+        else if (rx[1] == WRITE_SINGLE_REGISTER_COMMAND)
         {
-            command_write_single_registers(rx, rx_length, tx, tx_length);
+            command_write_single_register(rx, rx_length, tx, tx_length);
         }
         else if (rx[1] == WRITE_MULTIPLE_REGISTERS_COMMAND)
         {
@@ -41,6 +42,10 @@ int8_t modbus_entry(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_l
         else if (rx[1] == READ_COILS_COMMAND)
         {
             command_read_coils(rx, rx_length, tx, tx_length);
+        }
+        else if (rx[1] == WRITE_SINGLE_COIL_COMMAND)
+        {
+            command_write_single_coil(rx, rx_length, tx, tx_length);
         }
         else
         {
@@ -124,7 +129,7 @@ int8_t command_read_registers(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint
     }
 }
 
-int8_t command_write_single_registers(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_length)
+int8_t command_write_single_register(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_length)
 {
     if (rx_length != 6) //rx length is wrong
     {
@@ -145,7 +150,7 @@ int8_t command_write_single_registers(uint8_t *rx, uint16_t rx_length, uint8_t *
             registers.u16[write_address] = write_data;
 
             tx[0] = slave_id;
-            tx[1] = WRITE_SINGLE_REGISTERS_COMMAND;
+            tx[1] = WRITE_SINGLE_REGISTER_COMMAND;
             tx[2] = write_address >> 8;
             tx[3] = write_address & 0x00FF;
             tx[4] = write_data >> 8;
@@ -312,6 +317,56 @@ int8_t command_read_coils(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t
                     return 1;
                 }
             }
+        }
+        else
+        {
+            tx[0] = slave_id;
+            tx[1] = rx[1] | (1 << 7);
+            tx[2] = ERROR_CODE_ADRRESS_ERROR;
+            *tx_length = 3;
+            return 1;
+        }
+    }
+}
+
+int8_t command_write_single_coil(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_length)
+{
+    if (rx_length != 6) //rx length is wrong
+    {
+        tx[0] = slave_id;
+        tx[1] = rx[1] | (1 << 7);
+        tx[2] = ERROR_CODE_OTHER_ERROR;
+        *tx_length = 3;
+        return 1;
+    }
+    else
+    {
+        uint16_t write_address = (rx[2] << 8) | rx[3];
+        uint16_t write_data = (rx[4] << 8) | rx[5];
+
+        if (write_address >= MIN_WRITE_SINGLE_COIL && write_address <= MAX_WRITE_SINGLE_COIL) //write address in the scope
+        {
+            // all good
+            uint16_t write_byte_address = write_address / 8;
+            uint8_t write_byte_bit_address = write_address % 8;
+
+            if ((write_data & 1) == 0)
+            {
+                registers.u8[write_byte_address] = registers.u8[write_byte_address] & ~(1 << write_byte_bit_address);
+            }
+            else
+            {
+                registers.u8[write_byte_address] = registers.u8[write_byte_address] | (1 << write_byte_bit_address);
+            }
+
+            tx[0] = slave_id;
+            tx[1] = WRITE_SINGLE_COIL_COMMAND;
+            tx[2] = write_address >> 8;
+            tx[3] = write_address & 0x00FF;
+            tx[4] = write_data >> 8;
+            tx[5] = write_data & 0x00FF;
+            *tx_length = 6;
+            return 1;
         }
         else
         {
