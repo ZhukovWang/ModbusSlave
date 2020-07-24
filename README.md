@@ -1,5 +1,7 @@
 # ModbusSlave
 
+![C/C++ CI](https://github.com/ZhukovWang/ModbusSlave/workflows/C/C++%20CI/badge.svg)
+
 ModbusSlave is a modbus slave libary. 
 
 Build by standard C11 and can be used in Windows/Linux/embedded. 
