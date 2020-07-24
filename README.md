@@ -23,6 +23,11 @@ Support ascii and rtu mode. Can be used in serial or tcp.
 
 Use [Cmake](https://github.com/Kitware/CMake) to build.
 
+```bash
+$ cmake .
+$ make
+```
+
 The unit testing suits is [Unity](https://github.com/ThrowTheSwitch/Unity).
 
 ## Usage
