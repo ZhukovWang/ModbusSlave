@@ -5,6 +5,4 @@
 
 #include "register.h"
 
-
-
 union register_union registers;

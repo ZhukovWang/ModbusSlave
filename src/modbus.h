@@ -10,5 +10,6 @@ int8_t command_error(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_
 int8_t command_read_registers(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_length);
 int8_t command_write_single_registers(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_length);
 int8_t command_write_multiple_registers(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_length);
+int8_t command_read_coils(uint8_t *rx, uint16_t rx_length, uint8_t *tx, uint16_t *tx_length);
 
 #endif //MODBUSMASTER_MODBUS_H

@@ -10,7 +10,7 @@ Support ascii and rtu mode. Can be used in serial or tcp.
 
 ## Support Function code
 
-- [ ] 0x01
+- [x] 0x01
 - [x] 0x03
 - [ ] 0x05
 - [x] 0x06
