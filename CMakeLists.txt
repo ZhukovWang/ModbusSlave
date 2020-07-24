@@ -18,3 +18,5 @@ add_executable(ModbusSlave
         src/modbus.h
         test/modbus_test.c
         test/modbus_test.h src/register.c src/register.h src/config.c src/config.h src/frame_conversion.c src/frame_conversion.h test/frame_conversion_test.c test/frame_conversion_test.h src/frame.c src/frame.h test/frame_test.c test/frame_test.h)
+
+TARGET_LINK_LIBRARIES(ModbusSlave m)

@@ -76,7 +76,7 @@ void slave_ascii_mode_transmit()
     }
 }
 
-int mainloop()
+void mainloop()
 {
     printf("Please input the modbus frame:\n");
 
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 {
     if (argc == 2 && strcmp(argv[1],"test") == 0)
     {
-        test_all();
+        return test_all();
     }
     else
     {
